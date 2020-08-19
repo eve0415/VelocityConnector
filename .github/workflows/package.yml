@@ -21,9 +21,9 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
     - name: Build with Maven
       run: |
-        mvn -B package --file VelocityManager/pom.xml
-        rm -rf VelocityManager/target/*-shaded.jar VelocityManager/target/original-*.jar
-        mkdir staging && cp VelocityManager/target/*.jar staging
+        mvn -B package --file pom.xml
+        rm -rf VelocityManager/jar/target/*-shaded.jar VelocityManager/jar/target/original-*.jar
+        mkdir staging && cp VelocityManager/jar/target/*.jar staging
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       if: success()
