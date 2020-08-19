@@ -1,0 +1,7 @@
+name: VelocityManager
+version: 1.0
+main: net.eve0415.spigot.VelocityManager.VelocityManagerPlugin
+description: VelocityManager Intergration for PaperMC
+api-version: 1.16
+load: postworld
+author: eve0415

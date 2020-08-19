@@ -3,16 +3,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>net.eve0415.spigot.VelocityManager</groupId>
-  <artifactId>VelocityManager</artifactId>
+  <groupId>net.eve0415.spigot</groupId>
+  <artifactId>VelocityManager-parent</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
+  <name>VelocityManager-parent</name>
 
-
-  <name>VelocityManager</name>
-  <url></url>
+  <modules>
+    <module>papermc</module>
+    <module>velocity</module>
+    <module>jar</module>
+  </modules>
 
   <properties>
+    <projectEncoding>UTF-8</projectEncoding>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>8</maven.compiler.source>
@@ -22,36 +26,28 @@
 
   <repositories>
     <repository>
+      <id>papermc</id>
+      <url>https://papermc.io/repo/repository/maven-public/</url>
+    </repository>
+    <repository>
       <id>velocity</id>
       <url>https://repo.velocitypowered.com/snapshots/</url>
     </repository>
   </repositories>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.velocitypowered</groupId>
-      <artifactId>velocity-api</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
-
   <build>
-    <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.2.1</version>
         <executions>
           <execution>
-            <phase>package</phase>
+            <id>attach-sources</id>
+            <phase>deploy</phase>
             <goals>
-              <goal>shade</goal>
+              <goal>jar-no-fork</goal>
             </goals>
-            <configuration>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
-            </configuration>
           </execution>
         </executions>
       </plugin>
