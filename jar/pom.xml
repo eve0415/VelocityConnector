@@ -29,11 +29,6 @@
         <resources>
             <resource>
                 <targetPath>.</targetPath>
-                <filtering>false</filtering>
-                <directory>./</directory>
-            </resource>
-            <resource>
-                <targetPath>.</targetPath>
                 <filtering>true</filtering>
                 <directory>src/main/resources/</directory>
                 <includes>

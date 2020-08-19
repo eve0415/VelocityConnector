@@ -8,18 +8,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-
-import org.slf4j.Logger;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.event.ClickEvent;
@@ -27,14 +26,12 @@ import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 
 public class ServerCommand implements Command {
-    private final ProxyServer server;
-    private Logger logger;
+    private final VelocityManager instance;
 
-    public ServerCommand(ProxyServer server) {
-        this.server = server;
+    public ServerCommand(VelocityManager instance) {
+        this.instance = instance;
     }
 
-    // server name @a
     @Override
     public void execute(CommandSource source, String @NonNull [] ar) {
         if (!(source instanceof Player)) {
@@ -64,7 +61,7 @@ public class ServerCommand implements Command {
             // Assemble the list of servers as components
             TextComponent.Builder serverListBuilder = TextComponent.builder("Available servers: ")
                     .color(TextColor.YELLOW);
-            List<RegisteredServer> infos = ImmutableList.copyOf(server.getAllServers());
+            List<RegisteredServer> infos = ImmutableList.copyOf(this.instance.server.getAllServers());
 
             for (int i = 0; i < infos.size(); i++) {
                 RegisteredServer rs = infos.get(i);
@@ -91,7 +88,7 @@ public class ServerCommand implements Command {
             String serverName = args.get(0);
             String who = args.get(1);
 
-            Optional<RegisteredServer> toConnect = server.getServer(serverName);
+            Optional<RegisteredServer> toConnect = this.instance.server.getServer(serverName);
             if (!toConnect.isPresent()) {
                 player.sendMessage(TextComponent.of("Server " + serverName + " doesn't exist.", TextColor.RED));
                 return;
@@ -106,8 +103,13 @@ public class ServerCommand implements Command {
                 }
             } else if (who.equals("@s")) {
                 player.createConnectionRequest(toConnect.get()).fireAndForget();
+            } else if (who.equals("@p")) {
+                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                out.writeUTF("MySubChannel");
+                out.writeUTF("data1");
+
             } else {
-                Optional<Player> p = this.server.getPlayer(who);
+                Optional<Player> p = this.instance.server.getPlayer(who);
 
                 if (p.isPresent()) {
                     p.get().createConnectionRequest(toConnect.get()).fireAndForget();
@@ -121,7 +123,7 @@ public class ServerCommand implements Command {
     @Override
     public List<String> suggest(CommandSource source, String @NonNull [] currentArgs) {
         Stream<String> possibilitieServer = Stream.concat(Stream.of("all"),
-                server.getAllServers().stream().map(rs -> rs.getServerInfo().getName()));
+                this.instance.server.getAllServers().stream().map(rs -> rs.getServerInfo().getName()));
         Player player = (Player) source;
         player.sendMessage(TextComponent.of(currentArgs.length));
 
@@ -144,7 +146,7 @@ public class ServerCommand implements Command {
             }
             possibilities.add("@a");
             possibilities.add("@s");
-            logger.info(possibilities.toString());
+            this.instance.logger.info(possibilities.toString());
             return possibilities.stream()
                     .filter(name -> name.regionMatches(true, 0, currentArgs[0], 0, currentArgs[0].length()))
                     .collect(Collectors.toList());
