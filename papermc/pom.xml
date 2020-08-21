@@ -7,6 +7,7 @@
     <artifactId>VelocityManager-parent</artifactId>
     <groupId>net.eve0415.spigot</groupId>
     <version>1.0-SNAPSHOT</version>
+    <relativePath>../</relativePath>
   </parent>
 
   <artifactId>VelocityManager-papermc</artifactId>
@@ -21,19 +22,24 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources/</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>templating-maven-plugin</artifactId>
-        <version>1.0.0</version>
-        <executions>
-          <execution>
-            <id>filter-src</id>
-            <goals>
-              <goal>filter-sources</goal>
-            </goals>
-          </execution>
-        </executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Main-Class>net.eve0415.spigot.VelocityManager.VelocityManagerPlugin</Main-Class>
+            </manifestEntries>
+          </archive>
+        </configuration>
       </plugin>
     </plugins>
   </build>

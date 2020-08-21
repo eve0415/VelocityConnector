@@ -7,6 +7,7 @@
         <artifactId>VelocityManager-parent</artifactId>
         <groupId>net.eve0415.spigot</groupId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../</relativePath>
     </parent>
 
     <artifactId>VelocityManager</artifactId>
@@ -26,16 +27,7 @@
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <targetPath>.</targetPath>
-                <filtering>true</filtering>
-                <directory>src/main/resources/</directory>
-                <includes>
-                    <include>*</include>
-                </includes>
-            </resource>
-        </resources>
+        <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

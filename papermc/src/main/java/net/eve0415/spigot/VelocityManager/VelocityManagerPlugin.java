@@ -4,15 +4,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class VelocityManagerPlugin extends JavaPlugin {
     public static VelocityManagerPlugin instance;
+    public PaperPluginMessanger messenger;
 
     @Override
     public void onEnable() {
         instance = this;
-        getLogger().info("WebsocketIntegration enabled");
+        this.messenger = new PaperPluginMessanger(this);
+
+        getLogger().info("VelocityManager enabled");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("WebsocketIntegration disabled");
+        getLogger().info("VelocityManager disabled");
     }
 }

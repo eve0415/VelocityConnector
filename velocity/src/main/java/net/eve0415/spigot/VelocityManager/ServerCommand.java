@@ -105,9 +105,9 @@ public class ServerCommand implements Command {
                 player.createConnectionRequest(toConnect.get()).fireAndForget();
             } else if (who.equals("@p")) {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                out.writeUTF("MySubChannel");
-                out.writeUTF("data1");
-
+                out.writeUTF("nearbyPlayer");
+                out.writeUTF(serverName);
+                this.instance.messenger.sendOutgoingMessage(out, player);
             } else {
                 Optional<Player> p = this.instance.server.getPlayer(who);
 
