@@ -35,7 +35,7 @@ public class ServerCommand implements Command {
     @Override
     public void execute(CommandSource source, String @NonNull [] ar) {
         if (!(source instanceof Player)) {
-            source.sendMessage(TextComponent.of("Only players may run this command.", TextColor.RED));
+            source.sendMessage(TextComponent.of("このコマンドはプレイヤーのみが実行できます", TextColor.RED));
             return;
         }
 
@@ -54,27 +54,24 @@ public class ServerCommand implements Command {
 
         if (args.size() == 0) {
             String currentServer = player.getCurrentServer().map(ServerConnection::getServerInfo)
-                    .map(ServerInfo::getName).orElse("<unknown>");
-            player.sendMessage(
-                    TextComponent.of("You are currently connected to " + currentServer + ".", TextColor.YELLOW));
+                    .map(ServerInfo::getName).orElse("<不明>");
+            player.sendMessage(TextComponent.of("あなたは現在 " + currentServer + "に接続しています。", TextColor.YELLOW));
 
             // Assemble the list of servers as components
-            TextComponent.Builder serverListBuilder = TextComponent.builder("Available servers: ")
-                    .color(TextColor.YELLOW);
+            TextComponent.Builder serverListBuilder = TextComponent.builder("サーバ一覧: ").color(TextColor.YELLOW);
             List<RegisteredServer> infos = ImmutableList.copyOf(this.instance.server.getAllServers());
 
             for (int i = 0; i < infos.size(); i++) {
                 RegisteredServer rs = infos.get(i);
                 TextComponent infoComponent = TextComponent.of(rs.getServerInfo().getName());
-                String playersText = rs.getPlayersConnected().size() + " player(s) online";
+                String playersText = rs.getPlayersConnected().size() + " プレイヤーがオンラインです";
                 if (rs.getServerInfo().getName().equals(currentServer)) {
-                    infoComponent = infoComponent.color(TextColor.GREEN).hoverEvent(HoverEvent
-                            .showText(TextComponent.of("Currently connected to this server\n" + playersText)));
+                    infoComponent = infoComponent.color(TextColor.GREEN)
+                            .hoverEvent(HoverEvent.showText(TextComponent.of("現在このサーバーに接続されています\n" + playersText)));
                 } else {
                     infoComponent = infoComponent.color(TextColor.GRAY)
                             .clickEvent(ClickEvent.runCommand("/server " + rs.getServerInfo().getName()))
-                            .hoverEvent(HoverEvent
-                                    .showText(TextComponent.of("Click to connect to this server\n" + playersText)));
+                            .hoverEvent(HoverEvent.showText(TextComponent.of("クリックするとこのサーバーに接続されます\n" + playersText)));
                 }
                 serverListBuilder.append(infoComponent);
 
@@ -90,13 +87,13 @@ public class ServerCommand implements Command {
 
             Optional<RegisteredServer> toConnect = this.instance.server.getServer(serverName);
             if (!toConnect.isPresent()) {
-                player.sendMessage(TextComponent.of("Server " + serverName + " doesn't exist.", TextColor.RED));
+                player.sendMessage(TextComponent.of("サーバー名：" + serverName + " は存在しません。", TextColor.RED));
                 return;
             }
 
             if (!who.equals("@s")
                     && source.getPermissionValue("velocity.command.server.moveOtherPlayers") == Tristate.TRUE) {
-                player.sendMessage(TextComponent.of("You do not have permission to move other players", TextColor.RED));
+                player.sendMessage(TextComponent.of("あなたは、ほかのプレイヤーを移動させる権限がありません", TextColor.RED));
                 return;
             }
 
@@ -120,7 +117,7 @@ public class ServerCommand implements Command {
                 if (p.isPresent()) {
                     p.get().createConnectionRequest(toConnect.get()).fireAndForget();
                 } else {
-                    player.sendMessage(TextComponent.of("Cannot find player name " + who, TextColor.RED));
+                    player.sendMessage(TextComponent.of("プレイヤー名：" + who + " は見つかりませんでした。", TextColor.RED));
                 }
             }
         }
