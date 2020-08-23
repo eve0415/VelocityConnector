@@ -94,6 +94,12 @@ public class ServerCommand implements Command {
                 return;
             }
 
+            if (!who.equals("@s")
+                    && source.getPermissionValue("velocity.command.server.moveOtherPlayers") == Tristate.TRUE) {
+                player.sendMessage(TextComponent.of("You do not have permission to move other players", TextColor.RED));
+                return;
+            }
+
             if (who.equals("@a")) {
                 Optional<ServerConnection> s = player.getCurrentServer();
                 Collection<Player> currentPlayer = s.get().getServer().getPlayersConnected();
