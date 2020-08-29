@@ -10,19 +10,19 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 
 @Plugin(id = "velocitymanager", name = "VelocityManager", version = "1.0-SNAPSHOT", description = "Manager for Velocity", authors = "eve0415")
-public class VelocityManager {
+public final class VelocityManager {
     public final ProxyServer server;
     public final Logger logger;
     public VelocityPluginMessenger messenger;
 
     @Inject
-    public VelocityManager(ProxyServer server, Logger logger) {
+    public VelocityManager(final ProxyServer server, final Logger logger) {
         this.server = server;
         this.logger = logger;
     }
 
     @Subscribe
-    public void onProxyInit(ProxyInitializeEvent e) {
+    public void onProxyInit(final ProxyInitializeEvent e) {
         this.server.getCommandManager().register(new ServerCommand(this), "server");
         this.messenger = new VelocityPluginMessenger(this);
 

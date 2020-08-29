@@ -9,31 +9,31 @@ import com.google.common.io.ByteStreams;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
-public class PaperPluginMessanger implements PluginMessageListener {
+public final class PaperPluginMessanger implements PluginMessageListener {
     private static final String CHANNEL = "velocitymanager:message";
     private final VelocityManagerPlugin instance;
 
-    public PaperPluginMessanger(VelocityManagerPlugin instance) {
+    public PaperPluginMessanger(final VelocityManagerPlugin instance) {
         this.instance = instance;
 
         instance.getServer().getMessenger().registerIncomingPluginChannel(instance, CHANNEL, this);
         instance.getServer().getMessenger().registerOutgoingPluginChannel(instance, CHANNEL);
     }
 
-    public void sendOutgoingMessage(ByteArrayDataOutput out, Player player) {
+    public void sendOutgoingMessage(final ByteArrayDataOutput out, final Player player) {
         player.sendPluginMessage(instance, CHANNEL, out.toByteArray());
     }
 
     @Override
-    public void onPluginMessageReceived(String channel, Player player, byte[] bytes) {
-        ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+    public void onPluginMessageReceived(final String channel, final Player player, final byte[] bytes) {
+        final ByteArrayDataInput in = ByteStreams.newDataInput(bytes);
+        final ByteArrayDataOutput out = ByteStreams.newDataOutput();
 
-        String subChannel = in.readUTF();
+        final String subChannel = in.readUTF();
 
         if (subChannel.equalsIgnoreCase("nearbyPlayer")) {
-            String server = in.readUTF();
-            Optional<Player> nearest = player.getNearbyEntities(1000, 1000, 1000).stream()
+            final String server = in.readUTF();
+            final Optional<Player> nearest = player.getNearbyEntities(1000, 1000, 1000).stream()
                     .filter(e -> e instanceof Player).map(e -> ((Player) e)).findFirst();
 
             if (nearest.isPresent()) {
@@ -45,6 +45,8 @@ public class PaperPluginMessanger implements PluginMessageListener {
                 out.writeUTF("Cannot find nearby player");
                 sendOutgoingMessage(out, player);
             }
+        } else if (subChannel.equalsIgnoreCase("status")) {
+            this.instance.manager.handleMessage(in.readInt(), in.readUTF(), in.readUTF());
         }
     }
 }

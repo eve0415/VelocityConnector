@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.permission.Tristate;
@@ -25,22 +26,22 @@ import net.kyori.text.event.ClickEvent;
 import net.kyori.text.event.HoverEvent;
 import net.kyori.text.format.TextColor;
 
-public class ServerCommand implements Command {
+public final class ServerCommand implements Command {
     private final VelocityManager instance;
 
-    public ServerCommand(VelocityManager instance) {
+    public ServerCommand(final VelocityManager instance) {
         this.instance = instance;
     }
 
     @Override
-    public void execute(CommandSource source, String @NonNull [] ar) {
+    public void execute(final CommandSource source, final String @NonNull [] ar) {
         if (!(source instanceof Player)) {
             source.sendMessage(TextComponent.of("このコマンドはプレイヤーのみが実行できます", TextColor.RED));
             return;
         }
 
-        ArrayList<String> args = new ArrayList<String>();
-        Player player = (Player) source;
+        final ArrayList<String> args = new ArrayList<String>();
+        final Player player = (Player) source;
 
         if (ar.length != 0) {
             args.add(ar[0]);
@@ -53,18 +54,18 @@ public class ServerCommand implements Command {
         }
 
         if (args.size() == 0) {
-            String currentServer = player.getCurrentServer().map(ServerConnection::getServerInfo)
+            final String currentServer = player.getCurrentServer().map(ServerConnection::getServerInfo)
                     .map(ServerInfo::getName).orElse("<不明>");
             player.sendMessage(TextComponent.of("あなたは現在 " + currentServer + "に接続しています。", TextColor.YELLOW));
 
             // Assemble the list of servers as components
-            TextComponent.Builder serverListBuilder = TextComponent.builder("サーバ一覧: ").color(TextColor.YELLOW);
-            List<RegisteredServer> infos = ImmutableList.copyOf(this.instance.server.getAllServers());
+            final TextComponent.Builder serverListBuilder = TextComponent.builder("サーバ一覧: ").color(TextColor.YELLOW);
+            final List<RegisteredServer> infos = ImmutableList.copyOf(this.instance.server.getAllServers());
 
             for (int i = 0; i < infos.size(); i++) {
-                RegisteredServer rs = infos.get(i);
+                final RegisteredServer rs = infos.get(i);
                 TextComponent infoComponent = TextComponent.of(rs.getServerInfo().getName());
-                String playersText = rs.getPlayersConnected().size() + " プレイヤーがオンラインです";
+                final String playersText = rs.getPlayersConnected().size() + " プレイヤーがオンラインです";
                 if (rs.getServerInfo().getName().equals(currentServer)) {
                     infoComponent = infoComponent.color(TextColor.GREEN)
                             .hoverEvent(HoverEvent.showText(TextComponent.of("現在このサーバーに接続されています\n" + playersText)));
@@ -82,10 +83,10 @@ public class ServerCommand implements Command {
 
             player.sendMessage(serverListBuilder.build());
         } else {
-            String serverName = args.get(0);
-            String who = args.get(1);
+            final String serverName = args.get(0);
+            final String who = args.get(1);
 
-            Optional<RegisteredServer> toConnect = this.instance.server.getServer(serverName);
+            final Optional<RegisteredServer> toConnect = this.instance.server.getServer(serverName);
             if (!toConnect.isPresent()) {
                 player.sendMessage(TextComponent.of("サーバー名：" + serverName + " は存在しません。", TextColor.RED));
                 return;
@@ -98,21 +99,21 @@ public class ServerCommand implements Command {
             }
 
             if (who.equals("@a")) {
-                Optional<ServerConnection> s = player.getCurrentServer();
-                Collection<Player> currentPlayer = s.get().getServer().getPlayersConnected();
+                final Optional<ServerConnection> s = player.getCurrentServer();
+                final Collection<Player> currentPlayer = s.get().getServer().getPlayersConnected();
 
-                for (Player p : currentPlayer) {
+                for (final Player p : currentPlayer) {
                     p.createConnectionRequest(toConnect.get()).fireAndForget();
                 }
             } else if (who.equals("@s")) {
                 player.createConnectionRequest(toConnect.get()).fireAndForget();
             } else if (who.equals("@p")) {
-                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                final ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("nearbyPlayer");
                 out.writeUTF(serverName);
                 this.instance.messenger.sendOutgoingMessage(out, player);
             } else {
-                Optional<Player> p = this.instance.server.getPlayer(who);
+                final Optional<Player> p = this.instance.server.getPlayer(who);
 
                 if (p.isPresent()) {
                     p.get().createConnectionRequest(toConnect.get()).fireAndForget();
@@ -124,10 +125,10 @@ public class ServerCommand implements Command {
     }
 
     @Override
-    public List<String> suggest(CommandSource source, String @NonNull [] currentArgs) {
-        Stream<String> possibilitieServer = Stream.concat(Stream.of("all"),
+    public List<String> suggest(final CommandSource source, final String @NonNull [] currentArgs) {
+        final Stream<String> possibilitieServer = Stream.concat(Stream.of("all"),
                 this.instance.server.getAllServers().stream().map(rs -> rs.getServerInfo().getName()));
-        Player player = (Player) source;
+        final Player player = (Player) source;
         player.sendMessage(TextComponent.of(currentArgs.length));
 
         if (currentArgs.length == 0) {
@@ -140,11 +141,11 @@ public class ServerCommand implements Command {
             if (source.getPermissionValue("velocity.command.server.moveOtherPlayers") == Tristate.FALSE)
                 return ImmutableList.of();
 
-            Optional<ServerConnection> s = player.getCurrentServer();
-            Collection<Player> currentPlayer = s.get().getServer().getPlayersConnected();
-            ArrayList<String> possibilities = new ArrayList<String>();
+            final Optional<ServerConnection> s = player.getCurrentServer();
+            final Collection<Player> currentPlayer = s.get().getServer().getPlayersConnected();
+            final ArrayList<String> possibilities = new ArrayList<String>();
 
-            for (Player p : currentPlayer) {
+            for (final Player p : currentPlayer) {
                 possibilities.add(p.getUsername());
             }
             possibilities.add("@a");
@@ -159,7 +160,7 @@ public class ServerCommand implements Command {
     }
 
     @Override
-    public boolean hasPermission(CommandSource source, String @NonNull [] args) {
+    public boolean hasPermission(final CommandSource source, final String @NonNull [] args) {
         return source.getPermissionValue("velocity.command.server") != Tristate.FALSE;
     }
 }

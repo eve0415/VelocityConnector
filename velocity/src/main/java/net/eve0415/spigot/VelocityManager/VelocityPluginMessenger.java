@@ -1,6 +1,9 @@
 package net.eve0415.spigot.VelocityManager;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
@@ -19,32 +22,55 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
 
-public class VelocityPluginMessenger {
+public final class VelocityPluginMessenger {
     private final VelocityManager instance;
     private static final ChannelIdentifier CHANNEL = MinecraftChannelIdentifier.create("velocitymanager", "message");
 
-    public VelocityPluginMessenger(VelocityManager instance) {
+    public VelocityPluginMessenger(final VelocityManager instance) {
         this.instance = instance;
         instance.server.getChannelRegistrar().register(CHANNEL);
         instance.server.getEventManager().register(instance, this);
     }
 
-    public void sendOutgoingMessage(@NonNull ByteArrayDataOutput out, Player player) {
-        Optional<ServerConnection> server = player.getCurrentServer();
+    public void sendOutgoingMessage(@NonNull final ByteArrayDataOutput out, final Player player) {
+        final Optional<ServerConnection> server = player.getCurrentServer();
         server.get().sendPluginMessage(CHANNEL, out.toByteArray());
     }
 
     @Subscribe
-    public void onPluginMessage(PluginMessageEvent e) {
-        ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());
-        String subChannel = in.readUTF();
-        ServerConnection connection = (ServerConnection) e.getSource();
+    public void onPluginMessage(final PluginMessageEvent e) {
+        final ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());
+        final String subChannel = in.readUTF();
+        final ServerConnection connection = (ServerConnection) e.getSource();
 
         if (subChannel.equalsIgnoreCase("connect")) {
-            Optional<RegisteredServer> toConnect = this.instance.server.getServer(in.readUTF());
+            final Optional<RegisteredServer> toConnect = this.instance.server.getServer(in.readUTF());
             connection.getPlayer().createConnectionRequest(toConnect.get()).fireAndForget();
         } else if (subChannel.equalsIgnoreCase("error")) {
             connection.getPlayer().sendMessage(TextComponent.of(in.readUTF(), TextColor.RED));
+        } else if (subChannel.equalsIgnoreCase("status")) {
+            final int code = in.readInt();
+            final String name = in.readUTF();
+            instance.logger.info(name);
+            final ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            final Optional<RegisteredServer> server = this.instance.server.getServer(name);
+
+            out.writeUTF("status");
+            out.writeInt(code);
+            out.writeUTF(name);
+
+            if (server.isPresent()) {
+                try {
+                    server.get().ping().get(1000, TimeUnit.MILLISECONDS);
+                    out.writeUTF("online");
+                } catch (InterruptedException | ExecutionException | TimeoutException e1) {
+                    out.writeUTF("offline");
+                }
+            } else {
+                instance.logger.info("unknown");
+                out.writeUTF("unknown");
+            }
+            sendOutgoingMessage(out, connection.getPlayer());
         }
     }
 }
