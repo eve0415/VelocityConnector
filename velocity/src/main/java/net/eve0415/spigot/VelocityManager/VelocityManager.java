@@ -22,6 +22,9 @@ public final class VelocityManager {
 
     @Subscribe
     public void onProxyInit(final ProxyInitializeEvent e) {
+        // Unregister the default builtin "server" command first to register my own
+        // original "server" command
+        this.server.getCommandManager().unregister("server");
         this.server.getCommandManager().register(this.server.getCommandManager().metaBuilder("server").build(),
                 new ServerCommand(this));
         this.messenger = new VelocityPluginMessenger(this);
