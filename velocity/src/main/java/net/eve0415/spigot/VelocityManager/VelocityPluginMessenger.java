@@ -51,7 +51,7 @@ public final class VelocityPluginMessenger {
         } else if (subChannel.equalsIgnoreCase("status")) {
             final int code = in.readInt();
             final String name = in.readUTF();
-            instance.logger.info(name);
+
             final ByteArrayDataOutput out = ByteStreams.newDataOutput();
             final Optional<RegisteredServer> server = this.instance.server.getServer(name);
 
@@ -67,7 +67,6 @@ public final class VelocityPluginMessenger {
                     out.writeUTF("offline");
                 }
             } else {
-                instance.logger.info("unknown");
                 out.writeUTF("unknown");
             }
             sendOutgoingMessage(out, connection.getPlayer());

@@ -62,7 +62,6 @@ public final class manager {
 
         if (si == null)
             return;
-        instance.getLogger().info(state);
         for (final handler s : si) {
             if (s.getBlock().getState() instanceof Sign) {
                 if (state.equals("online")) {
