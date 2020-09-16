@@ -93,7 +93,7 @@ public final class ServerCommand implements Command {
             }
 
             if (!who.equals("@s")
-                    && source.getPermissionValue("velocity.command.server.moveOtherPlayers") == Tristate.TRUE) {
+                    && source.getPermissionValue("velocity.command.server.moveOtherPlayers") == Tristate.FALSE) {
                 player.sendMessage(TextComponent.of("あなたは、ほかのプレイヤーを移動させる権限がありません", TextColor.RED));
                 return;
             }
