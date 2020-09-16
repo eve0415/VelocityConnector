@@ -1,7 +1,6 @@
 package net.eve0415.spigot.VelocityManager;
 
 import com.google.inject.Inject;
-
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
@@ -23,7 +22,8 @@ public final class VelocityManager {
 
     @Subscribe
     public void onProxyInit(final ProxyInitializeEvent e) {
-        this.server.getCommandManager().register(new ServerCommand(this), "server");
+        this.server.getCommandManager().register(this.server.getCommandManager().metaBuilder("server").build(),
+                new ServerCommand(this));
         this.messenger = new VelocityPluginMessenger(this);
 
         logger.info("VelocityManager enabled");

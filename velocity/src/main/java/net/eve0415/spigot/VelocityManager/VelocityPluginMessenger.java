@@ -19,8 +19,8 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public final class VelocityPluginMessenger {
     private final VelocityManager instance;
@@ -47,7 +47,7 @@ public final class VelocityPluginMessenger {
             final Optional<RegisteredServer> toConnect = this.instance.server.getServer(in.readUTF());
             connection.getPlayer().createConnectionRequest(toConnect.get()).fireAndForget();
         } else if (subChannel.equalsIgnoreCase("error")) {
-            connection.getPlayer().sendMessage(TextComponent.of(in.readUTF(), TextColor.RED));
+            connection.getPlayer().sendMessage(TextComponent.of(in.readUTF(), NamedTextColor.RED));
         } else if (subChannel.equalsIgnoreCase("status")) {
             final int code = in.readInt();
             final String name = in.readUTF();

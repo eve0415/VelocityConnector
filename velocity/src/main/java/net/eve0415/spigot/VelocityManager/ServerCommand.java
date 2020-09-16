@@ -1,7 +1,11 @@
 package net.eve0415.spigot.VelocityManager;
 
+import static net.kyori.adventure.text.event.HoverEvent.showText;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,32 +15,34 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
-import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
-
-public final class ServerCommand implements Command {
+public final class ServerCommand implements SimpleCommand {
     private final VelocityManager instance;
+    public static final int MAX_SERVERS_TO_LIST = 50;
 
     public ServerCommand(final VelocityManager instance) {
         this.instance = instance;
     }
 
     @Override
-    public void execute(final CommandSource source, final String @NonNull [] ar) {
+    public void execute(final Invocation invocation) {
+        final CommandSource source = invocation.source();
+        final String[] ar = invocation.arguments();
+
         if (!(source instanceof Player)) {
-            source.sendMessage(TextComponent.of("このコマンドはプレイヤーのみが実行できます", TextColor.RED));
+            source.sendMessage(TextComponent.of("このコマンドはプレイヤーのみが実行できます", NamedTextColor.RED));
             return;
         }
 
@@ -54,47 +60,20 @@ public final class ServerCommand implements Command {
         }
 
         if (args.size() == 0) {
-            final String currentServer = player.getCurrentServer().map(ServerConnection::getServerInfo)
-                    .map(ServerInfo::getName).orElse("<不明>");
-            player.sendMessage(TextComponent.of("あなたは現在 " + currentServer + "に接続しています。", TextColor.YELLOW));
-
-            // Assemble the list of servers as components
-            final TextComponent.Builder serverListBuilder = TextComponent.builder("サーバ一覧: ").color(TextColor.YELLOW);
-            final List<RegisteredServer> infos = ImmutableList.copyOf(this.instance.server.getAllServers());
-
-            for (int i = 0; i < infos.size(); i++) {
-                final RegisteredServer rs = infos.get(i);
-                TextComponent infoComponent = TextComponent.of(rs.getServerInfo().getName());
-                final String playersText = rs.getPlayersConnected().size() + " プレイヤーがオンラインです";
-                if (rs.getServerInfo().getName().equals(currentServer)) {
-                    infoComponent = infoComponent.color(TextColor.GREEN)
-                            .hoverEvent(HoverEvent.showText(TextComponent.of("現在このサーバーに接続されています\n" + playersText)));
-                } else {
-                    infoComponent = infoComponent.color(TextColor.GRAY)
-                            .clickEvent(ClickEvent.runCommand("/server " + rs.getServerInfo().getName()))
-                            .hoverEvent(HoverEvent.showText(TextComponent.of("クリックするとこのサーバーに接続されます\n" + playersText)));
-                }
-                serverListBuilder.append(infoComponent);
-
-                if (i != infos.size() - 1) {
-                    serverListBuilder.append(TextComponent.of(", ", TextColor.GRAY));
-                }
-            }
-
-            player.sendMessage(serverListBuilder.build());
+            outputServerInformation(player);
         } else {
             final String serverName = args.get(0);
             final String who = args.get(1);
 
             final Optional<RegisteredServer> toConnect = this.instance.server.getServer(serverName);
             if (!toConnect.isPresent()) {
-                player.sendMessage(TextComponent.of("サーバー名：" + serverName + " は存在しません。", TextColor.RED));
+                player.sendMessage(TextComponent.of("サーバー名：" + serverName + " は存在しません。", NamedTextColor.RED));
                 return;
             }
 
             if (!who.equals("@s")
                     && source.getPermissionValue("velocity.command.server.moveOtherPlayers") == Tristate.FALSE) {
-                player.sendMessage(TextComponent.of("あなたは、ほかのプレイヤーを移動させる権限がありません", TextColor.RED));
+                player.sendMessage(TextComponent.of("あなたは、ほかのプレイヤーを移動させる権限がありません", NamedTextColor.RED));
                 return;
             }
 
@@ -118,49 +97,98 @@ public final class ServerCommand implements Command {
                 if (p.isPresent()) {
                     p.get().createConnectionRequest(toConnect.get()).fireAndForget();
                 } else {
-                    player.sendMessage(TextComponent.of("プレイヤー名：" + who + " は見つかりませんでした。", TextColor.RED));
+                    player.sendMessage(TextComponent.of("プレイヤー名：" + who + " は見つかりませんでした。", NamedTextColor.RED));
                 }
             }
         }
     }
 
-    @Override
-    public List<String> suggest(final CommandSource source, final String @NonNull [] currentArgs) {
-        final Stream<String> possibilitieServer = Stream.concat(Stream.of("all"),
-                this.instance.server.getAllServers().stream().map(rs -> rs.getServerInfo().getName()));
-        final Player player = (Player) source;
-        player.sendMessage(TextComponent.of(currentArgs.length));
+    private void outputServerInformation(final Player executor) {
+        final String currentServer = executor.getCurrentServer().map(ServerConnection::getServerInfo)
+                .map(ServerInfo::getName).orElse("<不明>");
+        executor.sendMessage(TextComponent.of("あなたは現在 " + currentServer + " に接続しています。", NamedTextColor.YELLOW));
 
-        if (currentArgs.length == 0) {
-            return possibilitieServer.collect(Collectors.toList());
-        } else if (currentArgs.length == 1) {
-            return possibilitieServer
-                    .filter(name -> name.regionMatches(true, 0, currentArgs[0], 0, currentArgs[0].length()))
-                    .collect(Collectors.toList());
-        } else if (currentArgs.length == 2) {
-            if (source.getPermissionValue("velocity.command.server.moveOtherPlayers") == Tristate.FALSE)
-                return ImmutableList.of();
-
-            final Optional<ServerConnection> s = player.getCurrentServer();
-            final Collection<Player> currentPlayer = s.get().getServer().getPlayersConnected();
-            final ArrayList<String> possibilities = new ArrayList<String>();
-
-            for (final Player p : currentPlayer) {
-                possibilities.add(p.getUsername());
-            }
-            possibilities.add("@a");
-            possibilities.add("@s");
-            this.instance.logger.info(possibilities.toString());
-            return possibilities.stream()
-                    .filter(name -> name.regionMatches(true, 0, currentArgs[0], 0, currentArgs[0].length()))
-                    .collect(Collectors.toList());
-        } else {
-            return ImmutableList.of();
+        final List<RegisteredServer> servers = sortedServerList(this.instance.server);
+        if (servers.size() > MAX_SERVERS_TO_LIST) {
+            executor.sendMessage(TextComponent
+                    .of("サーバーの数が多すぎるため、リスト表示することができません。Tab キーを使用することですべてのサーバーリストを表示することができます。", NamedTextColor.RED));
+            return;
         }
+
+        // Assemble the list of servers as components
+        final TextComponent.Builder serverListBuilder = TextComponent.builder("サーバ一覧: ").color(NamedTextColor.YELLOW);
+        for (int i = 0; i < servers.size(); i++) {
+            final RegisteredServer rs = servers.get(i);
+            serverListBuilder.append(formatServerComponent(currentServer, rs));
+            if (i != servers.size() - 1) {
+                serverListBuilder.append(TextComponent.of(", ", NamedTextColor.GRAY));
+            }
+        }
+
+        executor.sendMessage(serverListBuilder.build());
+    }
+
+    private List<RegisteredServer> sortedServerList(final ProxyServer proxy) {
+        final List<RegisteredServer> servers = new ArrayList<>(proxy.getAllServers());
+        servers.sort(Comparator.comparing(RegisteredServer::getServerInfo));
+        return Collections.unmodifiableList(servers);
+    }
+
+    private TextComponent formatServerComponent(final String currentPlayerServer, final RegisteredServer server) {
+        final ServerInfo serverInfo = server.getServerInfo();
+        TextComponent serverTextComponent = TextComponent.of(serverInfo.getName());
+
+        final String playersText = server.getPlayersConnected().size() + " プレイヤーがオンラインです";
+        if (serverInfo.getName().equals(currentPlayerServer)) {
+            serverTextComponent = serverTextComponent.color(NamedTextColor.GREEN)
+                    .hoverEvent(showText(TextComponent.of("現在このサーバーに接続されています\n" + playersText)));
+        } else {
+            serverTextComponent = serverTextComponent.color(NamedTextColor.GRAY)
+                    .clickEvent(ClickEvent.runCommand("/server " + serverInfo.getName()))
+                    .hoverEvent(showText(TextComponent.of("クリックすることでこのサーバーに接続されます\n" + playersText)));
+        }
+        return serverTextComponent;
     }
 
     @Override
-    public boolean hasPermission(final CommandSource source, final String @NonNull [] args) {
-        return source.getPermissionValue("velocity.command.server") != Tristate.FALSE;
+    public List<String> suggest(final Invocation invocation) {
+        final String[] currentArgs = invocation.arguments();
+        final Player player = (Player) invocation.source();
+        final Optional<ServerConnection> s = player.getCurrentServer();
+        final Collection<Player> currentPlayer = s.get().getServer().getPlayersConnected();
+        final ArrayList<String> pos = new ArrayList<String>();
+        for (final Player p : currentPlayer) {
+            pos.add(p.getUsername());
+        }
+        pos.add("@a");
+        pos.add("@s");
+        pos.add("@p");
+
+        final Stream<String> possibilities = pos.stream();
+        final Stream<String> serverPossibilities = this.instance.server.getAllServers().stream()
+                .map(rs -> rs.getServerInfo().getName());
+
+        if (currentArgs.length == 0) {
+            return serverPossibilities.collect(Collectors.toList());
+        }
+
+        if (currentArgs.length == 1) {
+            return serverPossibilities
+                    .filter(name -> name.regionMatches(true, 0, currentArgs[0], 0, currentArgs[0].length()))
+                    .collect(Collectors.toList());
+        }
+
+        if (currentArgs.length == 2 && invocation.source()
+                .getPermissionValue("velocity.command.server.moveOtherPlayers") == Tristate.TRUE) {
+            return possibilities.filter(name -> name.regionMatches(true, 0, currentArgs[1], 0, currentArgs[1].length()))
+                    .collect(Collectors.toList());
+        }
+
+        return ImmutableList.of();
+    }
+
+    @Override
+    public boolean hasPermission(final Invocation invocation) {
+        return invocation.source().getPermissionValue("velocity.command.server") != Tristate.FALSE;
     }
 }
