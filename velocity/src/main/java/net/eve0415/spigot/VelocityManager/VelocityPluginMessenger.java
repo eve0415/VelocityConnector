@@ -19,7 +19,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 public final class VelocityPluginMessenger {
@@ -47,7 +47,7 @@ public final class VelocityPluginMessenger {
             final Optional<RegisteredServer> toConnect = this.instance.server.getServer(in.readUTF());
             connection.getPlayer().createConnectionRequest(toConnect.get()).fireAndForget();
         } else if (subChannel.equalsIgnoreCase("error")) {
-            connection.getPlayer().sendMessage(TextComponent.of(in.readUTF(), NamedTextColor.RED));
+            connection.getPlayer().sendMessage(Component.text(in.readUTF(), NamedTextColor.RED));
         } else if (subChannel.equalsIgnoreCase("status")) {
             final int code = in.readInt();
             final String name = in.readUTF();

@@ -24,6 +24,7 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -42,7 +43,7 @@ public final class ServerCommand implements SimpleCommand {
         final String[] ar = invocation.arguments();
 
         if (!(source instanceof Player)) {
-            source.sendMessage(TextComponent.of("このコマンドはプレイヤーのみが実行できます", NamedTextColor.RED));
+            source.sendMessage(Component.text("このコマンドはプレイヤーのみが実行できます", NamedTextColor.RED));
             return;
         }
 
@@ -67,13 +68,13 @@ public final class ServerCommand implements SimpleCommand {
 
             final Optional<RegisteredServer> toConnect = this.instance.server.getServer(serverName);
             if (!toConnect.isPresent()) {
-                player.sendMessage(TextComponent.of("サーバー名：" + serverName + " は存在しません。", NamedTextColor.RED));
+                player.sendMessage(Component.text("サーバー名：" + serverName + " は存在しません。", NamedTextColor.RED));
                 return;
             }
 
             if (!who.equals("@s")
                     && source.getPermissionValue("velocity.command.server.moveOtherPlayers") == Tristate.FALSE) {
-                player.sendMessage(TextComponent.of("あなたは、ほかのプレイヤーを移動させる権限がありません", NamedTextColor.RED));
+                player.sendMessage(Component.text("あなたは、ほかのプレイヤーを移動させる権限がありません", NamedTextColor.RED));
                 return;
             }
 
@@ -97,7 +98,7 @@ public final class ServerCommand implements SimpleCommand {
                 if (p.isPresent()) {
                     p.get().createConnectionRequest(toConnect.get()).fireAndForget();
                 } else {
-                    player.sendMessage(TextComponent.of("プレイヤー名：" + who + " は見つかりませんでした。", NamedTextColor.RED));
+                    player.sendMessage(Component.text("プレイヤー名：" + who + " は見つかりませんでした。", NamedTextColor.RED));
                 }
             }
         }
@@ -106,22 +107,23 @@ public final class ServerCommand implements SimpleCommand {
     private void outputServerInformation(final Player executor) {
         final String currentServer = executor.getCurrentServer().map(ServerConnection::getServerInfo)
                 .map(ServerInfo::getName).orElse("<不明>");
-        executor.sendMessage(TextComponent.of("あなたは現在 " + currentServer + " に接続しています。", NamedTextColor.YELLOW));
+        executor.sendMessage(Component.text("あなたは現在 " + currentServer + " に接続しています。", NamedTextColor.YELLOW));
 
         final List<RegisteredServer> servers = sortedServerList(this.instance.server);
         if (servers.size() > MAX_SERVERS_TO_LIST) {
-            executor.sendMessage(TextComponent
-                    .of("サーバーの数が多すぎるため、リスト表示することができません。Tab キーを使用することですべてのサーバーリストを表示することができます。", NamedTextColor.RED));
+            executor.sendMessage(Component.text("サーバーの数が多すぎるため、リスト表示することができません。Tab キーを使用することですべてのサーバーリストを表示することができます。",
+                    NamedTextColor.RED));
             return;
         }
 
         // Assemble the list of servers as components
-        final TextComponent.Builder serverListBuilder = TextComponent.builder("サーバ一覧: ").color(NamedTextColor.YELLOW);
+        final TextComponent.Builder serverListBuilder = Component.text().content("サーバ一覧: ")
+                .color(NamedTextColor.YELLOW);
         for (int i = 0; i < servers.size(); i++) {
             final RegisteredServer rs = servers.get(i);
             serverListBuilder.append(formatServerComponent(currentServer, rs));
             if (i != servers.size() - 1) {
-                serverListBuilder.append(TextComponent.of(", ", NamedTextColor.GRAY));
+                serverListBuilder.append(Component.text(", ", NamedTextColor.GRAY));
             }
         }
 
@@ -136,16 +138,16 @@ public final class ServerCommand implements SimpleCommand {
 
     private TextComponent formatServerComponent(final String currentPlayerServer, final RegisteredServer server) {
         final ServerInfo serverInfo = server.getServerInfo();
-        TextComponent serverTextComponent = TextComponent.of(serverInfo.getName());
+        TextComponent serverTextComponent = Component.text(serverInfo.getName());
 
         final String playersText = server.getPlayersConnected().size() + " プレイヤーがオンラインです";
         if (serverInfo.getName().equals(currentPlayerServer)) {
             serverTextComponent = serverTextComponent.color(NamedTextColor.GREEN)
-                    .hoverEvent(showText(TextComponent.of("現在このサーバーに接続されています\n" + playersText)));
+                    .hoverEvent(showText(Component.text("現在このサーバーに接続されています\n" + playersText)));
         } else {
             serverTextComponent = serverTextComponent.color(NamedTextColor.GRAY)
                     .clickEvent(ClickEvent.runCommand("/server " + serverInfo.getName()))
-                    .hoverEvent(showText(TextComponent.of("クリックすることでこのサーバーに接続されます\n" + playersText)));
+                    .hoverEvent(showText(Component.text("クリックすることでこのサーバーに接続されます\n" + playersText)));
         }
         return serverTextComponent;
     }
