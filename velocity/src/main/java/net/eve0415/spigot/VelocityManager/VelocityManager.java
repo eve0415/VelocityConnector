@@ -10,9 +10,9 @@ import org.slf4j.Logger;
 
 @Plugin(id = "velocitymanager", name = "VelocityManager", version = "1.0-SNAPSHOT", description = "Manager for Velocity", authors = "eve0415")
 public final class VelocityManager {
-    public final ProxyServer server;
-    public final Logger logger;
-    public VelocityPluginMessenger messenger;
+    private final ProxyServer server;
+    private final Logger logger;
+    private VelocityPluginMessenger messenger;
 
     @Inject
     public VelocityManager(final ProxyServer server, final Logger logger) {
@@ -22,6 +22,8 @@ public final class VelocityManager {
 
     @Subscribe
     public void onProxyInit(final ProxyInitializeEvent e) {
+        logger.info("Loading VelocityManager...");
+
         // Unregister the default builtin "server" command first to register my own
         // original "server" command
         this.server.getCommandManager().unregister("server");
@@ -29,6 +31,18 @@ public final class VelocityManager {
                 new ServerCommand(this));
         this.messenger = new VelocityPluginMessenger(this);
 
-        logger.info("VelocityManager enabled");
+        logger.info("Successfully enabled");
+    }
+
+    public ProxyServer getServer() {
+        return server;
+    }
+
+    public Logger getLogger() {
+        return logger;
+    }
+
+    public VelocityPluginMessenger getMessenger() {
+        return messenger;
     }
 }

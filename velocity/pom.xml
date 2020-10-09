@@ -24,15 +24,25 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.2.0</version>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+        <artifactId>maven-replacer-plugin</artifactId>
+        <version>1.4.0</version>
+        <executions>
+          <execution>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
-          <archive>
-            <manifestEntries>
-              <Main-Class>net.eve0415.spigot.VelocityManager.VelocityManager</Main-Class>
-            </manifestEntries>
-          </archive>
+          <file>src\main\java\net\eve0415\spigot\VelocityManager\VelocityManager.java</file>
+          <replacements>
+            <replacement>
+              <token>@projectversion@</token>
+              <value>${project.version}</value>
+            </replacement>
+          </replacements>
         </configuration>
       </plugin>
     </plugins>

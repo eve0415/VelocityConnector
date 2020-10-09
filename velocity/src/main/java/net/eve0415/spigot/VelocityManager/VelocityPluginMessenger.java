@@ -28,8 +28,8 @@ public final class VelocityPluginMessenger {
 
     public VelocityPluginMessenger(final VelocityManager instance) {
         this.instance = instance;
-        instance.server.getChannelRegistrar().register(CHANNEL);
-        instance.server.getEventManager().register(instance, this);
+        instance.getServer().getChannelRegistrar().register(CHANNEL);
+        instance.getServer().getEventManager().register(instance, this);
     }
 
     public void sendOutgoingMessage(@NonNull final ByteArrayDataOutput out, final Player player) {
@@ -44,7 +44,7 @@ public final class VelocityPluginMessenger {
         final ServerConnection connection = (ServerConnection) e.getSource();
 
         if (subChannel.equalsIgnoreCase("connect")) {
-            final Optional<RegisteredServer> toConnect = this.instance.server.getServer(in.readUTF());
+            final Optional<RegisteredServer> toConnect = instance.getServer().getServer(in.readUTF());
             connection.getPlayer().createConnectionRequest(toConnect.get()).fireAndForget();
         } else if (subChannel.equalsIgnoreCase("error")) {
             connection.getPlayer().sendMessage(Component.text(in.readUTF(), NamedTextColor.RED));
@@ -53,7 +53,7 @@ public final class VelocityPluginMessenger {
             final String name = in.readUTF();
 
             final ByteArrayDataOutput out = ByteStreams.newDataOutput();
-            final Optional<RegisteredServer> server = this.instance.server.getServer(name);
+            final Optional<RegisteredServer> server = instance.getServer().getServer(name);
 
             out.writeUTF("status");
             out.writeInt(code);

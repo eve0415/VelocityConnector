@@ -6,25 +6,25 @@ import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
-public final class handler {
-    private final manager manager;
+public final class SignHandler {
+    private final SignManager manager;
     private final Location location;
     private final UUID world;
     private final String name;
-    private status stat;
+    private SignStatus stat;
     private final int identificator;
     private final static Random rand = new Random();
 
-    public handler(final Location location, final UUID world, final String name, final manager manager) {
+    public SignHandler(final Location location, final UUID world, final String name, final SignManager manager) {
         this.manager = manager;
         this.location = location;
         this.world = world;
         this.name = name;
-        this.stat = status.NEW;
+        this.stat = SignStatus.NEW;
         this.identificator = rand.nextInt(1000);
     }
 
-    public void setState(final status state) {
+    public void setState(final SignStatus state) {
         stat = state;
     }
 
@@ -44,7 +44,7 @@ public final class handler {
         return name;
     }
 
-    public status getState() {
+    public SignStatus getState() {
         return stat;
     }
 

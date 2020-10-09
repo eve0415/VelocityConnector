@@ -66,7 +66,7 @@ public final class ServerCommand implements SimpleCommand {
             final String serverName = args.get(0);
             final String who = args.get(1);
 
-            final Optional<RegisteredServer> toConnect = this.instance.server.getServer(serverName);
+            final Optional<RegisteredServer> toConnect = this.instance.getServer().getServer(serverName);
             if (!toConnect.isPresent()) {
                 player.sendMessage(Component.text("サーバー名：" + serverName + " は存在しません。", NamedTextColor.RED));
                 return;
@@ -91,9 +91,9 @@ public final class ServerCommand implements SimpleCommand {
                 final ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("nearbyPlayer");
                 out.writeUTF(serverName);
-                this.instance.messenger.sendOutgoingMessage(out, player);
+                this.instance.getMessenger().sendOutgoingMessage(out, player);
             } else {
-                final Optional<Player> p = this.instance.server.getPlayer(who);
+                final Optional<Player> p = this.instance.getServer().getPlayer(who);
 
                 if (p.isPresent()) {
                     p.get().createConnectionRequest(toConnect.get()).fireAndForget();
@@ -109,7 +109,7 @@ public final class ServerCommand implements SimpleCommand {
                 .map(ServerInfo::getName).orElse("<不明>");
         executor.sendMessage(Component.text("あなたは現在 " + currentServer + " に接続しています。", NamedTextColor.YELLOW));
 
-        final List<RegisteredServer> servers = sortedServerList(this.instance.server);
+        final List<RegisteredServer> servers = sortedServerList(this.instance.getServer());
         if (servers.size() > MAX_SERVERS_TO_LIST) {
             executor.sendMessage(Component.text("サーバーの数が多すぎるため、リスト表示することができません。Tab キーを使用することですべてのサーバーリストを表示することができます。",
                     NamedTextColor.RED));
@@ -167,7 +167,7 @@ public final class ServerCommand implements SimpleCommand {
         pos.add("@p");
 
         final Stream<String> possibilities = pos.stream();
-        final Stream<String> serverPossibilities = this.instance.server.getAllServers().stream()
+        final Stream<String> serverPossibilities = this.instance.getServer().getAllServers().stream()
                 .map(rs -> rs.getServerInfo().getName());
 
         if (currentArgs.length == 0) {

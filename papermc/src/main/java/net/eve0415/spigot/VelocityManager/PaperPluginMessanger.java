@@ -46,7 +46,7 @@ public final class PaperPluginMessanger implements PluginMessageListener {
                 sendOutgoingMessage(out, player);
             }
         } else if (subChannel.equalsIgnoreCase("status")) {
-            this.instance.manager.handleMessage(in.readInt(), in.readUTF(), in.readUTF());
+            instance.getManager().handleMessage(in.readInt(), in.readUTF(), in.readUTF());
         }
     }
 }

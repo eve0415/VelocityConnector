@@ -15,13 +15,13 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-import net.eve0415.spigot.VelocityManager.sign.handler;
-import net.eve0415.spigot.VelocityManager.sign.status;
+import net.eve0415.spigot.VelocityManager.sign.SignHandler;
+import net.eve0415.spigot.VelocityManager.sign.SignStatus;
 
-public final class eventHandler implements Listener {
+public final class PaperEventHandler implements Listener {
     private final VelocityManagerPlugin instance;
 
-    public eventHandler(final VelocityManagerPlugin instance) {
+    public PaperEventHandler(final VelocityManagerPlugin instance) {
         this.instance = instance;
         instance.getServer().getPluginManager().registerEvents(this, instance);
     }
@@ -37,7 +37,7 @@ public final class eventHandler implements Listener {
         if (!(ChatColor.stripColor(e.getLine(0)).startsWith("[") && ChatColor.stripColor(e.getLine(0)).endsWith("]")))
             return;
 
-        instance.manager.newSign(e.getPlayer(), (Location) e.getBlock().getLocation(),
+        instance.getManager().newSign(e.getPlayer(), (Location) e.getBlock().getLocation(),
                 ChatColor.stripColor(e.getLine(0)).substring(1, (ChatColor.stripColor(e.getLine(0)).length() - 1)));
     }
 
@@ -48,17 +48,17 @@ public final class eventHandler implements Listener {
         if (!(block.getState() instanceof Sign))
             return;
 
-        final handler sign = instance.manager.checkSign(block.getLocation());
+        final SignHandler sign = instance.getManager().checkSign(block.getLocation());
         if (sign == null) {
             final Sign state = (Sign) block.getState();
             if (!(ChatColor.stripColor(state.getLine(0)).startsWith("[")
                     && ChatColor.stripColor(state.getLine(0)).endsWith("]")))
                 return;
 
-            instance.manager.newSign(e.getPlayer(), (Location) block.getLocation(), ChatColor
+            instance.getManager().newSign(e.getPlayer(), (Location) block.getLocation(), ChatColor
                     .stripColor(state.getLine(0)).substring(1, (ChatColor.stripColor(state.getLine(0)).length() - 1)));
         } else {
-            instance.manager.refreshStatus(sign, e.getPlayer());
+            instance.getManager().refreshStatus(sign, e.getPlayer());
         }
     }
 
@@ -70,17 +70,17 @@ public final class eventHandler implements Listener {
         if (!(e.getClickedBlock().getState() instanceof Sign))
             return;
 
-        final handler sign = instance.manager.checkSign(e.getClickedBlock().getLocation());
+        final SignHandler sign = instance.getManager().checkSign(e.getClickedBlock().getLocation());
         final ByteArrayDataOutput out = ByteStreams.newDataOutput();
 
         if (sign == null)
             return;
-        if (sign.getState() == status.ONLINE) {
+        if (sign.getState() == SignStatus.ONLINE) {
             out.writeUTF("connect");
             out.writeUTF(sign.getName());
-            instance.messenger.sendOutgoingMessage(out, e.getPlayer());
+            instance.getMessenger().sendOutgoingMessage(out, e.getPlayer());
         }
-        if (sign.getState() == status.OFFLINE) {
+        if (sign.getState() == SignStatus.OFFLINE) {
             e.getPlayer().sendMessage(ChatColor.RED + "現在、サーバーが起動していないかオフラインのため、接続ができません");
         }
     }
@@ -94,10 +94,10 @@ public final class eventHandler implements Listener {
         if (!(e.getBlock().getState() instanceof Sign))
             return;
 
-        final handler sign = instance.manager.checkSign(e.getBlock().getLocation());
+        final SignHandler sign = instance.getManager().checkSign(e.getBlock().getLocation());
         if (sign == null)
             return;
 
-        instance.manager.remove(sign);
+        instance.getManager().remove(sign);
     }
 }

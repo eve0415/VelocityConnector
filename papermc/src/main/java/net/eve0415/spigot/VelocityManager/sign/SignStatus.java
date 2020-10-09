@@ -1,5 +1,5 @@
 package net.eve0415.spigot.VelocityManager.sign;
 
-public enum status {
+public enum SignStatus {
     ONLINE, OFFLINE, NEW,
 }

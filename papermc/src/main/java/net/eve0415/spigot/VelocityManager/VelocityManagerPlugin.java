@@ -2,24 +2,37 @@ package net.eve0415.spigot.VelocityManager;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-import net.eve0415.spigot.VelocityManager.sign.manager;
+import net.eve0415.spigot.VelocityManager.sign.SignManager;
 
 public final class VelocityManagerPlugin extends JavaPlugin {
-    public static VelocityManagerPlugin instance;
-    public PaperPluginMessanger messenger;
-    public manager manager;
+    private static VelocityManagerPlugin instance;
+    private PaperPluginMessanger messenger;
+    private SignManager manager;
 
     @Override
     public void onEnable() {
+        getLogger().info("Loading VelocityManager...");
         instance = this;
         this.messenger = new PaperPluginMessanger(this);
-        this.manager = new manager(this);
-        new eventHandler(this);
-        getLogger().info("VelocityManager enabled");
+        this.manager = new SignManager(this);
+        new PaperEventHandler(this);
+        getLogger().info("Successfully enabled");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("VelocityManager disabled");
+        getLogger().info("Successfully disabled");
+    }
+
+    public static VelocityManagerPlugin getInstance() {
+        return instance;
+    }
+
+    public PaperPluginMessanger getMessenger() {
+        return messenger;
+    }
+
+    public SignManager getManager() {
+        return manager;
     }
 }

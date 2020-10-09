@@ -12,40 +12,40 @@ import org.bukkit.entity.Player;
 import net.eve0415.spigot.VelocityManager.VelocityManagerPlugin;
 import net.md_5.bungee.api.ChatColor;
 
-public final class manager {
+public final class SignManager {
     private final VelocityManagerPlugin instance;
-    private final ArrayList<handler> signs = new ArrayList<>();
+    private final ArrayList<SignHandler> signs = new ArrayList<>();
 
-    public manager(final VelocityManagerPlugin instance) {
+    public SignManager(final VelocityManagerPlugin instance) {
         this.instance = instance;
     }
 
     public void newSign(final Player player, final Location location, final String name) {
-        final handler newSign = new handler(location, player.getWorld().getUID(), name, this);
+        final SignHandler newSign = new SignHandler(location, player.getWorld().getUID(), name, this);
         signs.add(newSign);
 
         refreshStatus(newSign, player);
     }
 
-    public void refreshStatus(final handler sign, final Player player) {
+    public void refreshStatus(final SignHandler sign, final Player player) {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("status");
         out.writeInt(sign.getIdentificator());
         out.writeUTF(sign.getName());
-        instance.messenger.sendOutgoingMessage(out, player);
+        instance.getMessenger().sendOutgoingMessage(out, player);
     }
 
-    public handler checkSign(final Location location) {
-        for (final handler sign : signs) {
+    public SignHandler checkSign(final Location location) {
+        for (final SignHandler sign : signs) {
             if (sign.getLocation().equals(location))
                 return sign;
         }
         return null;
     }
 
-    public ArrayList<handler> checkSign(final String name) {
-        final ArrayList<handler> applicableSigns = new ArrayList<>();
-        for (final handler sign : signs) {
+    public ArrayList<SignHandler> checkSign(final String name) {
+        final ArrayList<SignHandler> applicableSigns = new ArrayList<>();
+        for (final SignHandler sign : signs) {
             if (sign.getName().equals(name))
                 applicableSigns.add(sign);
         }
@@ -58,16 +58,16 @@ public final class manager {
     }
 
     public void handleMessage(final int code, final String name, final String state) {
-        final ArrayList<handler> si = checkSign(name);
+        final ArrayList<SignHandler> si = checkSign(name);
 
         if (si == null)
             return;
-        for (final handler s : si) {
+        for (final SignHandler s : si) {
             if (s.getBlock().getState() instanceof Sign) {
                 if (state.equals("online")) {
-                    s.setState(status.ONLINE);
+                    s.setState(SignStatus.ONLINE);
                 } else if (state.equals("offline")) {
-                    s.setState(status.OFFLINE);
+                    s.setState(SignStatus.OFFLINE);
                 } else {
                     remove(s);
                     return;
@@ -79,12 +79,12 @@ public final class manager {
         }
     }
 
-    private void updateSign(final Sign sign, final handler s) {
-        if (s.getState() == status.OFFLINE) {
+    private void updateSign(final Sign sign, final SignHandler s) {
+        if (s.getState() == SignStatus.OFFLINE) {
             sign.setLine(0, ChatColor.RED + "[" + ChatColor.BOLD + s.getName() + ChatColor.RESET + ChatColor.RED + "]");
             sign.setLine(2, "OFFLINE");
         }
-        if (s.getState() == status.ONLINE) {
+        if (s.getState() == SignStatus.ONLINE) {
             sign.setLine(0,
                     ChatColor.GREEN + "[" + ChatColor.BOLD + s.getName() + ChatColor.RESET + ChatColor.GREEN + "]");
             sign.setLine(2, "ONLINE");
@@ -95,7 +95,7 @@ public final class manager {
         sign.update(true);
     }
 
-    public void remove(final handler sign) {
+    public void remove(final SignHandler sign) {
         signs.remove(sign);
     }
 

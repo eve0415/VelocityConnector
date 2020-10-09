@@ -1,5 +1,5 @@
 name: VelocityManager
-version: 1.0
+version: 1.0-SNAPSHOT
 main: net.eve0415.spigot.VelocityManager.VelocityManagerPlugin
 description: VelocityManager Intergration for PaperMC
 api-version: 1.16
