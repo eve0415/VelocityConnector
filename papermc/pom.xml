@@ -36,7 +36,7 @@
           </execution>
         </executions>
         <configuration>
-          <file>.\src\main\resources\plugin.yml</file>
+          <file>./src/main/resources/plugin.yml</file>
           <replacements>
             <replacement>
               <token>@projectversion@</token>
