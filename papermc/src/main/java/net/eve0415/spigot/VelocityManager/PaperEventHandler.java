@@ -15,8 +15,8 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-import net.eve0415.spigot.VelocityManager.sign.SignHandler;
-import net.eve0415.spigot.VelocityManager.sign.SignStatus;
+import net.eve0415.spigot.VelocityManager.Sign.SignHandler;
+import net.eve0415.spigot.VelocityManager.Sign.SignStatus;
 
 public final class PaperEventHandler implements Listener {
     private final VelocityManagerPlugin instance;

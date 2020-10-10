@@ -1,4 +1,4 @@
-package net.eve0415.spigot.VelocityManager.sign;
+package net.eve0415.spigot.VelocityManager.Sign;
 
 import java.util.Random;
 import java.util.UUID;

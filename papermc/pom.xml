@@ -36,9 +36,7 @@
           </execution>
         </executions>
         <configuration>
-          <includes>
-            <include>${project.basedir}\src\main\resources\plugin.yml</include>
-          </includes>
+          <file>.\src\main\resources\plugin.yml</file>
           <replacements>
             <replacement>
               <token>@projectversion@</token>

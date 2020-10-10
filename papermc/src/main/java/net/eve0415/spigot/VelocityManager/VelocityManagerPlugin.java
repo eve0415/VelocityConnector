@@ -2,7 +2,7 @@ package net.eve0415.spigot.VelocityManager;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-import net.eve0415.spigot.VelocityManager.sign.SignManager;
+import net.eve0415.spigot.VelocityManager.Sign.SignManager;
 
 public final class VelocityManagerPlugin extends JavaPlugin {
     private static VelocityManagerPlugin instance;

@@ -36,9 +36,7 @@
           </execution>
         </executions>
         <configuration>
-          <includes>
-            <include>${project.basedir}\src\main\java\net\eve0415\spigot\VelocityManager\VelocityManager.java</include>
-          </includes>
+          <file>.\src\main\java\net\eve0415\spigot\VelocityManager\VelocityManager.java</file>
           <replacements>
             <replacement>
               <token>@projectversion@</token>
