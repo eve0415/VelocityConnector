@@ -1,4 +1,4 @@
 {
     "maven.view": "hierarchical",
-    "java.format.settings.profile": "${workspaceFolder}\formatter.xml"
+    "java.format.settings.url": "./formatter.xml"
 }
